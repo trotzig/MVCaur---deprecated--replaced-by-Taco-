@@ -28,13 +28,13 @@ public class RegexpMapper {
 	}
 	
 	public static enum ParamType {
-		STRING(String.class, "([^\\/]+)"),
-		DOUBLE(Double.class, "([0-9,.]+)", new ValueParser() {
+		BOOLEAN(Boolean.class, "(true|false)", new ValueParser() {
 			@Override
 			public Object parse(String s) {
-				return Double.parseDouble(s);
+				return Boolean.parseBoolean(s);
 			}
 		}),
+		STRING(String.class, "([^\\/]+)"),
 		INT(Integer.class, "([0-9]+)", new ValueParser() {
 			@Override
 			public Object parse(String s) {
@@ -45,6 +45,12 @@ public class RegexpMapper {
 			@Override
 			public Object parse(String s) {
 				return Long.parseLong(s);
+			}
+		}),
+		DOUBLE(Double.class, "([0-9,.]+)", new ValueParser() {
+			@Override
+			public Object parse(String s) {
+				return Double.parseDouble(s);
 			}
 		});
 		
