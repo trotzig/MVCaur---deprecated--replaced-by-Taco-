@@ -65,7 +65,7 @@ public class RouterFilter implements Filter {
 	private void renderJson(PreparedFlow flow, HttpServletResponse response, Object result) throws IOException {
 		response.setContentType("application/json");
 		Gson gson = router.createGson(flow.getFlow());
-		response.getWriter().print(gson.toJson(result));
+		gson.toJson(result, response.getWriter());
 	}
 
 

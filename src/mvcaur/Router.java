@@ -53,7 +53,7 @@ public abstract class Router {
 	 */
 	protected RoutingFlow route(String route) {
 		RoutingFlow flow = new RoutingFlow();
-		flow.setMapping(route);
+		flow.route(route);
 		flows.add(flow);
 		return flow;
 	}

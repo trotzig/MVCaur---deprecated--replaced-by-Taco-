@@ -165,4 +165,9 @@ public class RoutingFlow {
 		}
 	}
 
+	public RoutingFlow route(String route) {
+		setMapping(route);
+		return this;
+	}
+
 }
