@@ -5,22 +5,25 @@ import java.util.Map;
 
 import mvcaur.RegexpMapper.ParamType;
 import mvcaur.RegexpMapper.PreparedMapping;
+import mvcaur.def.ForwardRenderer;
+import mvcaur.def.JsonRenderer;
 
+/**
+ * A {@link RoutingFlow} is a representation of a routing flow through MVCaur.
+ * For a request, each routing flow is checked to see if it knows how to handle
+ * the request. A routing flow knows what request it can handle, which
+ * controller to execute and how to render the response.
+ * 
+ * A response can be rendered by any predefined type represented by {@link Type}
+ * , or a custom {@link Renderer}.
+ * 
+ * @author henper
+ * 
+ */
 public class RoutingFlow {
 
-	/**
-	 * The different routing types to choose from.
-	 * 
-	 * @author henper
-	 * 
-	 */
-	public static enum Type {
-		FORWARD, JSON
-	}
-
 	private Class<? extends Controller<?>> controller;
-	private String forward;
-	private Type type;
+	private Renderer renderer;
 	private String mapping;
 	private RegexpMapper mapper;
 
@@ -41,20 +44,12 @@ public class RoutingFlow {
 		this.controller = controller;
 	}
 
-	public String getForward() {
-		return forward;
+	public Renderer getRenderer() {
+		return renderer;
 	}
 
-	protected void setForward(String forward) {
-		this.forward = forward;
-	}
-
-	public Type getType() {
-		return type;
-	}
-
-	protected void setType(Type type) {
-		this.type = type;
+	public void setRenderer(Renderer renderer) {
+		this.renderer = renderer;
 	}
 
 	/**
@@ -76,8 +71,18 @@ public class RoutingFlow {
 	 * @return
 	 */
 	public RoutingFlow renderedBy(String forward) {
-		setForward(forward);
-		setType(Type.FORWARD);
+		this.renderer = new ForwardRenderer(forward);
+		return this;
+	}
+
+	/**
+	 * Instruct the routing flow to render through your own custom renderer
+	 * 
+	 * @param renderer
+	 * @return
+	 */
+	public RoutingFlow renderedBy(Renderer renderer) {
+		this.renderer = renderer;
 		return this;
 	}
 
@@ -87,8 +92,7 @@ public class RoutingFlow {
 	 * @return
 	 */
 	public RoutingFlow renderAsJson() {
-		setType(Type.JSON);
-		setForward(null);
+		this.renderer = new JsonRenderer();
 		return this;
 	}
 
@@ -126,9 +130,10 @@ public class RoutingFlow {
 			}
 		}
 		// secondly, set all params from request parameters
-		Map<String, String[]> params = requestParams;
-		for (Map.Entry<String, String[]> entry : params.entrySet()) {
-			handleRequestParam(ctrl, entry);
+		if (requestParams != null) {
+			for (Map.Entry<String, String[]> entry : requestParams.entrySet()) {
+				handleRequestParam(ctrl, entry);
+			}
 		}
 		return ctrl;
 	}
@@ -153,8 +158,8 @@ public class RoutingFlow {
 		String nameUpper = name.substring(0, 1).toUpperCase()
 				+ name.substring(1);
 		try {
-			Method setMethod = controller.getMethod("set" + nameUpper, obj
-					.getClass());
+			Method setMethod = controller.getMethod("set" + nameUpper,
+					obj.getClass());
 			try {
 				setMethod.invoke(ctrl, obj);
 			} catch (Exception e) {

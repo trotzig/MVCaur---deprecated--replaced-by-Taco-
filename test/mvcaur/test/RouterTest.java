@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import mvcaur.Controller;
-import mvcaur.DefaultObjectFactory;
 import mvcaur.RoutingFlow;
+import mvcaur.def.DefaultObjectFactory;
 import mvcaur.test.controller.AllParamTypes;
 import mvcaur.test.controller.NoMapping;
 

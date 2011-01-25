@@ -11,10 +11,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import mvcaur.RoutingFlow.Type;
-
-import com.google.gson.Gson;
-
 public class RouterFilter implements Filter {
 
 	private Router router;
@@ -28,7 +24,6 @@ public class RouterFilter implements Filter {
 	private static final String zeroArgumentConstructorBody = "() {\n"
 			+ "\t//default constructor, needed by mvcaur\n" + "}";
 
-	private ObjectFactory objectFactory;
 
 	@Override
 	public void destroy() {
@@ -41,31 +36,22 @@ public class RouterFilter implements Filter {
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
-		PreparedFlow flow = router.execute(request.getRequestURI(), request.getParameterMap(), objectFactory);
+		PreparedFlow flow = router.execute(request.getRequestURI(),
+				request.getParameterMap());
 		if (flow == null) {
-			//no url mapping for this request, continue as if nothing happened.
+			// no url mapping for this request, continue as if nothing happened.
 			chain.doFilter(req, resp);
 		} else {
 			routeThrough(request, response, flow);
 		}
 	}
-	
-	private void routeThrough(HttpServletRequest request, HttpServletResponse response, PreparedFlow flow) throws ServletException, IOException {
+
+	private void routeThrough(HttpServletRequest request,
+			HttpServletResponse response, PreparedFlow flow)
+			throws ServletException, IOException {
 		Controller<?> ctrl = flow.getPreparedController();
 		Object result = ctrl.execute();
-		if (flow.getFlow().getType() == Type.FORWARD) {
-			request.setAttribute("mvcaur", result);
-			request.setAttribute("controller", ctrl);
-			request.getRequestDispatcher(flow.getFlow().getForward()).forward(request, response);
-		} else if (flow.getFlow().getType() == Type.JSON) {
-			renderJson(flow, response, result);
-		}
-	}
-
-	private void renderJson(PreparedFlow flow, HttpServletResponse response, Object result) throws IOException {
-		response.setContentType("application/json");
-		Gson gson = router.createGson(flow.getFlow());
-		gson.toJson(result, response.getWriter());
+		flow.getFlow().getRenderer().render(result, ctrl, request, response);
 	}
 
 
@@ -108,46 +94,8 @@ public class RouterFilter implements Filter {
 		}
 
 		router.init();
-		initObjectFactory(conf);
 
 	}
 
-	private void initObjectFactory(FilterConfig conf) {
-		String ofClassName = conf.getInitParameter("object-factory");
-		if (ofClassName != null) {
-			try {
-				Class<?> clazz = Class.forName(ofClassName);
-				Object ofObj;
-				try {
-					ofObj = clazz.newInstance();
-				} catch (Exception e) {
-					throw new RuntimeException(
-							"Failed to initialize the object-factory class. Does \""
-									+ ofClassName
-									+ "\" have a zero argument default constructor? "
-									+ "If not, add such a constructor:\n"
-									+ "public " + clazz.getSimpleName()
-									+ zeroArgumentConstructorBody, e);
-				}
-				try {
-					this.objectFactory = (ObjectFactory) ofObj;
-				} catch (ClassCastException e) {
-					throw new RuntimeException(
-							"Failed to create the object factory. Make sure "
-									+ ofClassName + " implements the "
-									+ ObjectFactory.class.getName()
-									+ " interface", e);
-				}
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(
-						"The object-factory class can not be found. Is \""
-								+ ofClassName
-								+ "\" a real class and on the runtime classpath?",
-						e);
-			}
-		} else {
-			this.objectFactory = new DefaultObjectFactory();
-		}
-	}
 
 }

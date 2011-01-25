@@ -1,4 +1,6 @@
-package mvcaur;
+package mvcaur.def;
+
+import mvcaur.ObjectFactory;
 
 public class DefaultObjectFactory implements ObjectFactory {
 

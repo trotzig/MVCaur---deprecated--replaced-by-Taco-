@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
+import mvcaur.def.DefaultObjectFactory;
 
 /**
  * Base class for the mvcaur routing configuration.
@@ -15,20 +15,29 @@ import com.google.gson.Gson;
 public abstract class Router {
 
 	private List<RoutingFlow> flows = new ArrayList<RoutingFlow>();
+	private ObjectFactory objectFactory = new DefaultObjectFactory();
+
+	/**
+	 * Inject an object factory
+	 * 
+	 * @param objectFactory
+	 */
+	public void setObjectFactory(ObjectFactory objectFactory) {
+		this.objectFactory = objectFactory;
+	}
 
 	/**
 	 * Finds a flow for a specific request URI.
 	 * 
 	 * @param requestURI
 	 * @param requestParams
-	 * @param factory
 	 * @return
 	 */
 	public final PreparedFlow execute(String requestURI,
-			Map<String, String[]> requestParams, ObjectFactory factory) {
+			Map<String, String[]> requestParams) {
 		for (RoutingFlow flow : flows) {
 			Controller<?> ctrl = flow.execute(requestURI, requestParams,
-					factory);
+					objectFactory);
 
 			if (ctrl != null) {
 				PreparedFlow pflow = new PreparedFlow();
@@ -41,9 +50,19 @@ public abstract class Router {
 	}
 
 	/**
+	 * Execute without request params
+	 * 
+	 * @param uri
+	 * @return
+	 */
+	public PreparedFlow execute(String uri) {
+		return execute(uri, null);
+	}
+
+	/**
 	 * This is where all url mappings are configured.
 	 */
-	protected abstract void init();
+	public abstract void init();
 
 	/**
 	 * Start configuring routing for a specific url pattern.
@@ -56,17 +75,6 @@ public abstract class Router {
 		flow.route(route);
 		flows.add(flow);
 		return flow;
-	}
-
-	/**
-	 * Gets a Gson instance to use when creating json output. Can be overridden
-	 * to allow for custom Gson instances.
-	 * 
-	 * @param flow
-	 * @return
-	 */
-	protected Gson createGson(RoutingFlow flow) {
-		return new Gson();
 	}
 
 }
