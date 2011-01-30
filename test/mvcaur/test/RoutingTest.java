@@ -22,7 +22,7 @@ public class RoutingTest {
 		};
 		router.init();
 		PreparedFlow flow = router.execute("/");
-		NoMapping controller = (NoMapping) flow.getPreparedController();
+		NoMapping controller = (NoMapping) flow.getContinuation().getController();
 		assertEquals("no-mapping", controller.execute());
 	}
 	
@@ -31,7 +31,7 @@ public class RoutingTest {
 			
 			@Override
 			public void init() {
-				route("/{}").through(NoMapping.class).renderedBy("/start.jsp");
+				route("/{name}").through(NoMapping.class).renderedBy("/start.jsp");
 			}
 		};
 		PreparedFlow flow = router.execute("/hello/foo/bar");

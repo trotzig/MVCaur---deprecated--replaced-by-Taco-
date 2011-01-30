@@ -24,6 +24,8 @@ public class DefaultRouter extends Router {
 				"/start.jsp");
 		route("/hello/{message}/{number:int}").through(DefaultController.class)
 				.renderedBy("/start.jsp");
+		
+		route("/servlet").throughServlet(TestServlet.class);
 	}
 
 }

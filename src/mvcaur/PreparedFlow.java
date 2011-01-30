@@ -10,7 +10,7 @@ package mvcaur;
 public class PreparedFlow {
 
 	private RoutingFlow flow;
-	private Controller<?> preparedController;
+	private RoutingContinuation continuation;
 
 	/**
 	 * Gets the flow description for this prepared flow.
@@ -25,17 +25,16 @@ public class PreparedFlow {
 		this.flow = flow;
 	}
 
-	/**
-	 * Gets the controller, prepared for execution.
-	 * 
-	 * @return
-	 */
-	public Controller<?> getPreparedController() {
-		return preparedController;
+	public RoutingContinuation getContinuation() {
+		return continuation;
 	}
 
-	public void setPreparedController(Controller<?> preparedController) {
-		this.preparedController = preparedController;
+	public void setContinuation(RoutingContinuation continuation) {
+		this.continuation = continuation;
 	}
+
+	
+	
+
 
 }

@@ -36,13 +36,13 @@ public abstract class Router {
 	public final PreparedFlow execute(String requestURI,
 			Map<String, String[]> requestParams) {
 		for (RoutingFlow flow : flows) {
-			Controller<?> ctrl = flow.execute(requestURI, requestParams,
+			RoutingContinuation cont = flow.execute(requestURI, requestParams,
 					objectFactory);
 
-			if (ctrl != null) {
+			if (cont != null) {
 				PreparedFlow pflow = new PreparedFlow();
 				pflow.setFlow(flow);
-				pflow.setPreparedController(ctrl);
+				pflow.setContinuation(cont);
 				return pflow;
 			}
 		}

@@ -17,7 +17,7 @@ public class JsonTest {
 	public void testSimpleJson() {
 		RoutingFlow flow = new RoutingFlow().route("/").through(NoMapping.class).renderAsJson();
 		Gson gson = new Gson();
-		String json = gson.toJson(flow.execute("/", RouterTest.emptyRequestParams, new DefaultObjectFactory()).execute());
+		String json = gson.toJson(flow.execute("/", RouterTest.emptyRequestParams, new DefaultObjectFactory()).getController().execute());
 		assertEquals("\"no-mapping\"", json);
 	}
 	
@@ -26,7 +26,7 @@ public class JsonTest {
 	public void testComplexType() {
 		RoutingFlow flow = new RoutingFlow().route("/").through(ComplexMapping.class).renderAsJson();
 		Gson gson = new Gson();
-		String json = gson.toJson(flow.execute("/", RouterTest.emptyRequestParams, new DefaultObjectFactory()).execute());
+		String json = gson.toJson(flow.execute("/", RouterTest.emptyRequestParams, new DefaultObjectFactory()).getController().execute());
 		assertEquals("[{\"val\":\"foo\"},{\"val\":\"bar\"}]", json);
 	}
 	

@@ -20,7 +20,7 @@ public class RouterTest {
 	public void testNoParams() {
 		RoutingFlow flow = new RoutingFlow().route("/").through(NoMapping.class);
 		assertNull(flow.execute("/55", emptyRequestParams, new DefaultObjectFactory()));
-		Controller<?> c = flow.execute("/", emptyRequestParams, new DefaultObjectFactory()); 
+		Controller<?> c = flow.execute("/", emptyRequestParams, new DefaultObjectFactory()).getController(); 
 		assertNotNull(c);
 		assertEquals(NoMapping.class, c.getClass());
 	}
@@ -31,7 +31,7 @@ public class RouterTest {
 		RoutingFlow flow = new RoutingFlow().route("/{bool:boolean}/static/{number:int}/{longer:long}/{doubler:double}/{string:string}/{stringDefault}").through(AllParamTypes.class);
 		assertNull(flow.execute("/55", emptyRequestParams, new DefaultObjectFactory()));
 		assertNull(flow.execute("/", emptyRequestParams, new DefaultObjectFactory()));
-		AllParamTypes c = (AllParamTypes) flow.execute("/true/static/1/2/2.5/string/3", emptyRequestParams, new DefaultObjectFactory()); 
+		AllParamTypes c = (AllParamTypes) flow.execute("/true/static/1/2/2.5/string/3", emptyRequestParams, new DefaultObjectFactory()).getController(); 
 		assertNotNull(c);
 		assertEquals(Integer.valueOf(1), c.getNumber());
 		assertEquals(Long.valueOf(2), c.getLonger());
@@ -45,7 +45,7 @@ public class RouterTest {
 	public void wrongTypeDoesNotMatch() {
 		RoutingFlow flow = new RoutingFlow().route("/{number:int}").through(AllParamTypes.class);
 		assertNull(flow.execute("/hh", emptyRequestParams, new DefaultObjectFactory()));
-		AllParamTypes c = (AllParamTypes) flow.execute("/123", emptyRequestParams, new DefaultObjectFactory()); 
+		AllParamTypes c = (AllParamTypes) flow.execute("/123", emptyRequestParams, new DefaultObjectFactory()).getController(); 
 		assertNotNull(c);
 		assertEquals(Integer.valueOf(123), c.getNumber());
 	}

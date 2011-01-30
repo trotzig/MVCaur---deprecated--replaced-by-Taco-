@@ -49,9 +49,15 @@ public class RouterFilter implements Filter {
 	private void routeThrough(HttpServletRequest request,
 			HttpServletResponse response, PreparedFlow flow)
 			throws ServletException, IOException {
-		Controller<?> ctrl = flow.getPreparedController();
-		Object result = ctrl.execute();
-		flow.getFlow().getRenderer().render(result, ctrl, request, response);
+		RoutingContinuation cont = flow.getContinuation();
+		if (cont.getController() != null) {
+			Object result = cont.getController().execute();
+			flow.getFlow().getRenderer().render(result, cont.getController(), request, response);
+		} else if (cont.getServlet() != null) {
+			cont.getServlet().service(request, response);
+		} else {
+			throw new RuntimeException("No continuation found for this request");
+		}
 	}
 
 

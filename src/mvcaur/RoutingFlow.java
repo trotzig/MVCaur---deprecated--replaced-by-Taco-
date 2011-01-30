@@ -3,6 +3,8 @@ package mvcaur;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import javax.servlet.Servlet;
+
 import mvcaur.RegexpMapper.ParamType;
 import mvcaur.RegexpMapper.PreparedMapping;
 import mvcaur.def.ForwardRenderer;
@@ -14,7 +16,7 @@ import mvcaur.def.JsonRenderer;
  * the request. A routing flow knows what request it can handle, which
  * controller to execute and how to render the response.
  * 
- * A response can be rendered by any predefined type represented by {@link Type}
+ * A response can be rendered by any predefined type
  * , or a custom {@link Renderer}.
  * 
  * @author henper
@@ -23,6 +25,7 @@ import mvcaur.def.JsonRenderer;
 public class RoutingFlow {
 
 	private Class<? extends Controller<?>> controller;
+	private Class<? extends Servlet> servlet;
 	private Renderer renderer;
 	private String mapping;
 	private RegexpMapper mapper;
@@ -46,6 +49,10 @@ public class RoutingFlow {
 
 	public Renderer getRenderer() {
 		return renderer;
+	}
+	
+	public Class<? extends Servlet> getServlet() {
+		return servlet;
 	}
 
 	public void setRenderer(Renderer renderer) {
@@ -97,19 +104,34 @@ public class RoutingFlow {
 	}
 
 	/**
-	 * Returns a controller if the routing flow knows how to handle a request
+	 * Returns a controller/servlet if the routing flow knows how to handle a request
 	 * 
 	 * @param request
 	 *            .getRequestURI()
 	 * @return
 	 */
-	public Controller<?> execute(String requestURI,
+	public RoutingContinuation execute(String requestURI,
 			Map<String, String[]> requestParams, ObjectFactory factory) {
 		PreparedMapping mapping = mapper.execute(requestURI);
 		if (mapping != null) {
-			return createController(factory, mapping, requestParams);
+			return createContinuation(factory, mapping, requestParams);
 		}
 		return null;
+	}
+
+	private RoutingContinuation createContinuation(ObjectFactory factory,
+			PreparedMapping m, Map<String, String[]> requestParams) {
+		RoutingContinuation cont = new RoutingContinuation();
+		if (controller != null) {
+			cont.setController(createController(factory, m, requestParams));
+		} else if (servlet != null) {
+			try {
+				cont.setServlet((Servlet) factory.create(servlet));
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to create servlet", e);
+			}
+		}
+		return cont;
 	}
 
 	private Controller<?> createController(ObjectFactory factory,
@@ -173,6 +195,15 @@ public class RoutingFlow {
 	public RoutingFlow route(String route) {
 		setMapping(route);
 		return this;
+	}
+
+	/**
+	 * Instruct the flow to route through a servlet
+	 * 
+	 * @param clazz
+	 */
+	public void throughServlet(Class<? extends Servlet> clazz) {
+		this.servlet = clazz;
 	}
 
 }
