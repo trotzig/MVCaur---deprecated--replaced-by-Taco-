@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class RouterFilter implements Filter {
+	public static ServletContext servletContext;
 
 	private Router router;
 	private static final String correctWebXml = "<filter>\n"
@@ -64,6 +66,7 @@ public class RouterFilter implements Filter {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void init(FilterConfig conf) throws ServletException {
+		servletContext = conf.getServletContext();
 		String routerClass = conf.getInitParameter("router");
 		if (routerClass == null) {
 			throw new RouterMissingException(

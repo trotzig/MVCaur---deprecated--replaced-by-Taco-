@@ -1,12 +1,14 @@
 package mvcaur;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.Servlet;
 
 import mvcaur.RegexpMapper.ParamType;
 import mvcaur.RegexpMapper.PreparedMapping;
+import mvcaur.def.DefaultObjectFactory;
 import mvcaur.def.ForwardRenderer;
 import mvcaur.def.JsonRenderer;
 
@@ -16,20 +18,31 @@ import mvcaur.def.JsonRenderer;
  * the request. A routing flow knows what request it can handle, which
  * controller to execute and how to render the response.
  * 
- * A response can be rendered by any predefined type
- * , or a custom {@link Renderer}.
+ * A response can be rendered by any predefined type , or a custom
+ * {@link Renderer}.
  * 
  * @author henper
  * 
  */
 public class RoutingFlow {
 
+	private Map<Class<? extends Servlet>, Servlet> loadedServlets = new HashMap<Class<? extends Servlet>, Servlet>();
+
 	private Class<? extends Controller<?>> controller;
-	private Class<? extends Servlet> servlet;
+	private Servlet servlet;
 	private Renderer renderer;
 	private String mapping;
 	private RegexpMapper mapper;
+	private ObjectFactory objectFactory;
 
+	public RoutingFlow(ObjectFactory objectFactory) {
+		this.objectFactory = objectFactory;
+	}
+	
+	public RoutingFlow() {
+		this.objectFactory = new DefaultObjectFactory();
+	}
+	
 	public String getMapping() {
 		return mapping;
 	}
@@ -50,8 +63,8 @@ public class RoutingFlow {
 	public Renderer getRenderer() {
 		return renderer;
 	}
-	
-	public Class<? extends Servlet> getServlet() {
+
+	public Servlet getServlet() {
 		return servlet;
 	}
 
@@ -104,29 +117,30 @@ public class RoutingFlow {
 	}
 
 	/**
-	 * Returns a controller/servlet if the routing flow knows how to handle a request
+	 * Returns a controller/servlet if the routing flow knows how to handle a
+	 * request
 	 * 
 	 * @param request
 	 *            .getRequestURI()
 	 * @return
 	 */
 	public RoutingContinuation execute(String requestURI,
-			Map<String, String[]> requestParams, ObjectFactory factory) {
+			Map<String, String[]> requestParams) {
 		PreparedMapping mapping = mapper.execute(requestURI);
 		if (mapping != null) {
-			return createContinuation(factory, mapping, requestParams);
+			return createContinuation(mapping, requestParams);
 		}
 		return null;
 	}
 
-	private RoutingContinuation createContinuation(ObjectFactory factory,
-			PreparedMapping m, Map<String, String[]> requestParams) {
+	private RoutingContinuation createContinuation(PreparedMapping m,
+			Map<String, String[]> requestParams) {
 		RoutingContinuation cont = new RoutingContinuation();
 		if (controller != null) {
-			cont.setController(createController(factory, m, requestParams));
+			cont.setController(createController(objectFactory, m, requestParams));
 		} else if (servlet != null) {
 			try {
-				cont.setServlet((Servlet) factory.create(servlet));
+				cont.setServlet(servlet);
 			} catch (Exception e) {
 				throw new RuntimeException("Failed to create servlet", e);
 			}
@@ -203,7 +217,17 @@ public class RoutingFlow {
 	 * @param clazz
 	 */
 	public void throughServlet(Class<? extends Servlet> clazz) {
-		this.servlet = clazz;
+		Servlet s = loadedServlets.get(clazz);
+		if (s == null) {
+			try {
+				s = (Servlet) objectFactory.create(clazz);
+				s.init(new InjectedServletConfig(RouterFilter.servletContext));
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to create servlet", e);
+			}
+			loadedServlets.put(clazz, s);
+		}
+		this.servlet = s;
 	}
 
 }

@@ -1,12 +1,13 @@
 package mvcaur.test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import mvcaur.Controller;
 import mvcaur.RoutingFlow;
-import mvcaur.def.DefaultObjectFactory;
 import mvcaur.test.controller.AllParamTypes;
 import mvcaur.test.controller.NoMapping;
 
@@ -19,8 +20,8 @@ public class RouterTest {
 	@Test
 	public void testNoParams() {
 		RoutingFlow flow = new RoutingFlow().route("/").through(NoMapping.class);
-		assertNull(flow.execute("/55", emptyRequestParams, new DefaultObjectFactory()));
-		Controller<?> c = flow.execute("/", emptyRequestParams, new DefaultObjectFactory()).getController(); 
+		assertNull(flow.execute("/55", emptyRequestParams));
+		Controller<?> c = flow.execute("/", emptyRequestParams).getController(); 
 		assertNotNull(c);
 		assertEquals(NoMapping.class, c.getClass());
 	}
@@ -29,9 +30,9 @@ public class RouterTest {
 	@Test
 	public void testAllParamTypes() {
 		RoutingFlow flow = new RoutingFlow().route("/{bool:boolean}/static/{number:int}/{longer:long}/{doubler:double}/{string:string}/{stringDefault}").through(AllParamTypes.class);
-		assertNull(flow.execute("/55", emptyRequestParams, new DefaultObjectFactory()));
-		assertNull(flow.execute("/", emptyRequestParams, new DefaultObjectFactory()));
-		AllParamTypes c = (AllParamTypes) flow.execute("/true/static/1/2/2.5/string/3", emptyRequestParams, new DefaultObjectFactory()).getController(); 
+		assertNull(flow.execute("/55", emptyRequestParams));
+		assertNull(flow.execute("/", emptyRequestParams));
+		AllParamTypes c = (AllParamTypes) flow.execute("/true/static/1/2/2.5/string/3", emptyRequestParams).getController(); 
 		assertNotNull(c);
 		assertEquals(Integer.valueOf(1), c.getNumber());
 		assertEquals(Long.valueOf(2), c.getLonger());
@@ -44,8 +45,8 @@ public class RouterTest {
 	@Test
 	public void wrongTypeDoesNotMatch() {
 		RoutingFlow flow = new RoutingFlow().route("/{number:int}").through(AllParamTypes.class);
-		assertNull(flow.execute("/hh", emptyRequestParams, new DefaultObjectFactory()));
-		AllParamTypes c = (AllParamTypes) flow.execute("/123", emptyRequestParams, new DefaultObjectFactory()).getController(); 
+		assertNull(flow.execute("/hh", emptyRequestParams));
+		AllParamTypes c = (AllParamTypes) flow.execute("/123", emptyRequestParams).getController(); 
 		assertNotNull(c);
 		assertEquals(Integer.valueOf(123), c.getNumber());
 	}

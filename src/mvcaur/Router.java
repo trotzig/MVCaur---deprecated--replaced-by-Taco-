@@ -36,8 +36,7 @@ public abstract class Router {
 	public final PreparedFlow execute(String requestURI,
 			Map<String, String[]> requestParams) {
 		for (RoutingFlow flow : flows) {
-			RoutingContinuation cont = flow.execute(requestURI, requestParams,
-					objectFactory);
+			RoutingContinuation cont = flow.execute(requestURI, requestParams);
 
 			if (cont != null) {
 				PreparedFlow pflow = new PreparedFlow();
@@ -71,7 +70,7 @@ public abstract class Router {
 	 * @return a routing flow, optimized for method chaining
 	 */
 	protected RoutingFlow route(String route) {
-		RoutingFlow flow = new RoutingFlow();
+		RoutingFlow flow = new RoutingFlow(objectFactory);
 		flow.route(route);
 		flows.add(flow);
 		return flow;
