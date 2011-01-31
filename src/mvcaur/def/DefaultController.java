@@ -1,6 +1,7 @@
 package mvcaur.def;
 
 import mvcaur.Controller;
+import mvcaur.StatusCodeException;
 
 public class DefaultController implements Controller<String> {
 
@@ -9,10 +10,14 @@ public class DefaultController implements Controller<String> {
 	
 	@Override
 	public String execute() {
-		if (message != null) {
-			return message + " " + number;
-		}
-		return "Hello world!";
+		if (message == null) {
+			throw new StatusCodeException(404, "No message found");
+		} 
+		if (number == null) {
+			throw new StatusCodeException(503, "server error");
+		} 
+		
+		return message + " " + number;
 	}
 	
 	public void setMessage(String message) {

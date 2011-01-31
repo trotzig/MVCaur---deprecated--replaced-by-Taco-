@@ -44,7 +44,13 @@ public class RouterFilter implements Filter {
 			// no url mapping for this request, continue as if nothing happened.
 			chain.doFilter(req, resp);
 		} else {
-			routeThrough(request, response, flow);
+			try {
+				request.setAttribute("mvcaur_userIsAdmin", router.isUserAdmin());
+				routeThrough(request, response, flow);
+			} catch (StatusCodeException e) {
+				//respond with the status code
+				response.sendError(e.getCode(), e.getMessage());
+			}
 		}
 	}
 
