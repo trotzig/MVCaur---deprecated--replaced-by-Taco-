@@ -1,0 +1,95 @@
+<project name="mvcaur">
+	<property file="build.${user.name}.properties" />
+	<property file="build.${host.name}.properties" />
+	<property file="build.properties" />
+	<property environment="env" />
+	<!--
+		This classpath is used when compiling the dist folder 
+		and running datanucleus enhancer.
+	-->
+	<path id="dist.classpath">
+		<pathelement path="dist/build" />
+		<fileset dir="war/WEB-INF/lib">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${sdk.dir}/lib">
+			<include name="shared/**/*.jar" />
+		</fileset>
+	</path>
+
+	<path id="test.classpath">
+		<path refid="dist.classpath" />
+		<pathelement path="test/build" />
+		<fileset dir="test/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+
+
+
+
+	<!--
+		Cleans the dist folder.
+	-->
+	<target name="clean" description="Wipes out the dist folder">
+		<delete dir="dist" />
+	</target>
+
+	<!--
+		Compiles all java source files into the dist folder.
+	-->
+	<target name="compile" description="Compiles Java source and copies other source files to the WAR.">
+		<mkdir dir="dist/build" />
+		<copy todir="dist/build">
+			<fileset dir="src">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<javac  srcdir="src" destdir="dist/build" classpathref="dist.classpath" debug="on" encoding="utf-8"/>
+	</target>
+
+
+
+	<target name="test" depends="clean-test,compile-test" description="Runs all tests in the test folder">
+		<junit printsummary="yes" haltonerror="true" haltonfailure="true">
+			<classpath refid="test.classpath" />
+			<formatter usefile="false" type="brief"/>
+			<batchtest>
+				<fileset dir="test/src">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="clean-test" description="Cleans the build folder in the test folder">
+		<delete dir="test/build">
+		</delete>
+	</target>
+	
+	<target name="make-build" depends="compile" description="Bundles a jar">
+		<jar destfile="dist/mvcaur-xxx.jar">
+			<fileset dir="dist/build">
+			</fileset>
+		</jar>
+		<jar destfile="dist/mvcaur-sources-xxx.jar">
+			<fileset dir="src">
+			</fileset>
+		</jar>
+	</target>
+	
+
+	<target name="compile-test" description="Compiles test classes">
+		<mkdir dir="test/build" />
+		<copy todir="test/build">
+			<fileset dir="test/src">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<javac srcdir="test/src" destdir="test/build" classpathref="test.classpath" debug="on" encoding="iso-8859-1"/>
+	</target>
+
+
+
+</project>
