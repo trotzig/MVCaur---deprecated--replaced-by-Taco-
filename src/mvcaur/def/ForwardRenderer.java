@@ -41,8 +41,6 @@ public class ForwardRenderer implements Renderer {
 	@Override
 	public void render(Object result, Controller<?> controller,
 			HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, IOException {
-		request.setAttribute("mvcaur", result);
-		request.setAttribute("controller", controller);
 		request.getRequestDispatcher(forward).forward(request, response);
 	}
 

@@ -17,7 +17,10 @@ public class DefaultRouter extends Router {
 
 	@Override
 	public void init() {
-		route("/").through(DefaultController.class).renderedBy("/start.jsp");
+		route("/").through(ComplexController.class).renderedBy("/complex.jsp");
+		
+		route("/simple").renderedBy("/simple.jsp");
+		
 		route("/json/{message}/{number:int}").through(DefaultController.class)
 				.renderAsJson();
 		route("/hello/{message}").through(DefaultController.class).renderedBy(

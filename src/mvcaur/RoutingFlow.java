@@ -28,7 +28,7 @@ public class RoutingFlow {
 
 	private Map<Class<? extends Servlet>, Servlet> loadedServlets = new HashMap<Class<? extends Servlet>, Servlet>();
 
-	private Class<? extends Controller<?>> controller;
+	private Class<? extends Controller<?>> controller = VoidController.class;
 	private Servlet servlet;
 	private Renderer renderer;
 	private String mapping;
@@ -228,6 +228,7 @@ public class RoutingFlow {
 			loadedServlets.put(clazz, s);
 		}
 		this.servlet = s;
+		this.controller = null; //reset controller
 	}
 
 }

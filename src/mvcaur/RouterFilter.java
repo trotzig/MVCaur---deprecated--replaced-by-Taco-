@@ -60,6 +60,8 @@ public class RouterFilter implements Filter {
 		RoutingContinuation cont = flow.getContinuation();
 		if (cont.getController() != null) {
 			Object result = cont.getController().execute();
+			request.setAttribute("mvcaur", result);
+			request.setAttribute("controller", cont.getController());
 			flow.getFlow().getRenderer().render(result, cont.getController(), request, response);
 		} else if (cont.getServlet() != null) {
 			cont.getServlet().service(request, response);
