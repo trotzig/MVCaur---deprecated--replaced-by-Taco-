@@ -40,12 +40,12 @@ public class RouterFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) resp;
 		PreparedFlow flow = router.execute(request.getRequestURI(),
 				request.getParameterMap());
+		request.setAttribute("mvcaur_userIsAdmin", router.isUserAdmin());
 		if (flow == null) {
 			// no url mapping for this request, continue as if nothing happened.
 			chain.doFilter(req, resp);
 		} else {
 			try {
-				request.setAttribute("mvcaur_userIsAdmin", router.isUserAdmin());
 				routeThrough(request, response, flow);
 			} catch (StatusCodeException e) {
 				//respond with the status code
